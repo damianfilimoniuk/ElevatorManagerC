@@ -116,7 +116,7 @@ void* student_thread(void* arg) {
             start_floor);
     print_system_state(start_floor, msg);
 
-    // Zabezpiecenie przed kradzieżą biletów
+    // Zabezpieczenie przed kradzieżą biletów
     int last_seen_floor = start_floor;
     while (my_elevator->current_floor != dest_floor) {
         pthread_mutex_unlock(&hall.hall_mutex);

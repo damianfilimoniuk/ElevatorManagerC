@@ -57,8 +57,10 @@ void* elevator_thread(void* arg) {
         sprintf(msg, "Winda P%d", me->current_floor);
         print_system_state(me->current_floor, msg);
 
-        pthread_cond_broadcast(&hall.hall_cond); // Poinformowanie śpiących watków studentóœ
-        pthread_mutex_unlock(&hall.hall_mutex); // Odblokowanie mutexy
+        // Poinformowanie śpiących wątków studentów
+        pthread_cond_broadcast(&hall.hall_cond);
+         // Odblokowanie mutex'a
+        pthread_mutex_unlock(&hall.hall_mutex);
     }
     return NULL;
 }
@@ -106,7 +108,7 @@ void* student_thread(void* arg) {
     }
 	
 	
-    // Wsidanie do windy
+    // Wsiadanie do windy
     hall.students_waiting_on_floor[start_floor]--;
     my_elevator->passengers++;
     my_elevator->dir = my_dir;
