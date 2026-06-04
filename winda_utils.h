@@ -1,48 +1,37 @@
+#include <pthread.h>
+#include <semaphore.h>
 #ifndef WINDA_UTILS_H
 #define WINDA_UTILS_H
 
-#include <pthread.h>
-#include <semaphore.h>
-
-// Definicja możliwych kierunków jazdy windy
 typedef enum { 
-    DIR_STOP = 0, 
-    DIR_UP = 1, 
-    DIR_DOWN = -1 
+	DIR_STOP = 0, 
+	DIR_UP = 1, 
+	DIR_DOWN = -1 
 } Direction;
 
-// Struktura przechowująca stan pojedynczej windy
 typedef struct {
-    int id;
-    int current_floor;
-    int passengers;
-    int capacity;
-    Direction dir;
+	int id;
+	int current_floor;
+	int passengers;
+	int capacity;
+	Direction dir;
 } Elevator;
 
-// Struktura przechowująca globalny stan całego akademika
 typedef struct {
-    int num_elevators;
-    int num_floors;
-    int num_students;
-    int elevator_capacity;
-    
-    int active_students;
-    int *students_waiting_on_floor;
-    Elevator *elevators;
-    
-    pthread_mutex_t system_mutex;
-    
-    // Narzędzia dla wariantu ze zmiennymi warunkowymi
-    pthread_cond_t system_cond;
+	int num_elevators;
+	int num_floors;
+	int *students_waiting_on_floor;
+	Elevator *elevators;
+	pthread_mutex_t hall_mutex;
+	
+	pthread_cond_t hall_cond;
 
-    // Narzędzia dla wariantu z semaforami
-    sem_t system_sem;
-    sem_t *capacity_sems;
-    
-} SystemState;
+	sem_t *floor_sems;
+	sem_t *elevator_sems; 
+} ResidenceHall;
 
-extern SystemState sys;
+extern ResidenceHall hall;
+
 void print_system_state(int active_floor, const char* event_msg);
 
 #endif

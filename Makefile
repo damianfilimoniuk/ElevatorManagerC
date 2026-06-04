@@ -1,17 +1,28 @@
-# Kompilator i flagi
 CC = gcc
 CFLAGS = -Wall -Wextra -pthread
 
-# Domyślny cel 
-all: winda_cond winda_sem
+all: winda_zmienne winda_semafory
 
-# Reguła budowania Wariantu 1
-winda_cond: winda_cond.c winda_utils.c winda_utils.h
-	$(CC) $(CFLAGS) -o winda_cond winda_cond.c winda_utils.c
+winda_zmienne: winda_zmienne.o winda_utils.o
+	$(CC) $(CFLAGS) -o winda_zmienne winda_zmienne.o winda_utils.o
 
-# Reguła budowania Wariantu 2 
-winda_sem: winda_sem.c winda_utils.c winda_utils.h
-	$(CC) $(CFLAGS) -o winda_sem winda_sem.c winda_utils.c
+winda_semafory: winda_semafory.o winda_utils.o
+	$(CC) $(CFLAGS) -o winda_semafory winda_semafory.o winda_utils.o
+
+winda_zmienne.o: winda_zmienne.c winda_utils.h
+	$(CC) $(CFLAGS) -c winda_zmienne.c
+
+winda_semafory.o: winda_semafory.c winda_utils.h
+	$(CC) $(CFLAGS) -c winda_semafory.c
+
+winda_utils.o: winda_utils.c winda_utils.h
+	$(CC) $(CFLAGS) -c winda_utils.c
 
 clean:
-	rm -f winda_cond winda_sem
+	rm -f *.o winda_zmienne winda_semafory
+
+run-zmienne: winda_zmienne
+	./winda_zmienne 3 8 3 | python3 wizualizacja.py
+
+run-semafory: winda_semafory
+	./winda_semafory 3 8 3 | python3 wizualizacja.py

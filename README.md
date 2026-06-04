@@ -1,55 +1,71 @@
-# Symulator Wind - Akademik "Pico Bello" 🏢
+# Symulator Wind – System Synchronizacji Wątków w Akademiku
 
-Projekt zaliczeniowy z przedmiotu Systemy Operacyjne demonstrujący rozwiązanie klasycznego problemu synchronizacji wielu wątków współdzielących ograniczony zasób (windy). System zarządza ruchem pasażerskim w wielopiętrowym akademiku, zapobiegając zakleszczeniom (deadlocks) i zagłodzeniu wątków (starvation).
+Zaawansowany projekt z zakresu systemów operacyjnych, prezentujący wielowątkową symulację ruchu wind w wirtualnym akademiku. System demonstruje praktyczne zastosowanie mechanizmów synchronizacji wątków standardu POSIX oraz komunikację międzyprocesową z zewnętrznym modułem wizualizacyjnym napisanym w języku Python.
 
-## Cechy projektu
+## 🎯 Cel projektu
+Celem projektu jest zaprojektowanie i implementacja wielowątkowego systemu symulacji ruchu wind, z wykorzystaniem zaawansowanych mechanizmów synchronizacji procesów. 
 
-* **Dwa warianty synchronizacji**: Projekt zawiera niezależne implementacje oparte na zmiennych warunkowych (`pthread_cond_t`) oraz semaforach POSIX (`sem_t`).
-* **Inteligentny algorytm planowania (SSTF/LOOK)**: Windy nie poruszają się w sposób naiwny. Puste kabiny skanują budynek w poszukiwaniu najbliższego zgłoszenia, minimalizując czas oczekiwania, a w przypadku braku wezwań przechodzą w stan uśpienia.
-* **Graficzna wizualizacja**: Dołączony skrypt w języku Python czyta logi generowane przez program w C (w formacie JSON) przez standardowe wejście (pipe) i renderuje płynną animację w czasie rzeczywistym, pozwalając na analizę "Slow Mo".
+Projekt stawia przed sobą następujące cele techniczne i edukacyjne:
+* **Synchronizacja wielowątkowa:** Praktyczne opanowanie mechanizmów `mutex` do zapewnienia wzajemnego wykluczenia oraz zmiennych warunkowych i semaforów POSIX do obsługi powiadomień pomiędzy wątkami studentów i wind.
+* **Optymalizacja algorytmiczna:** Implementacja uproszczonego algorytmu sterowania windami , który pozwala na inteligentne podejmowanie decyzji o kierunku ruchu, minimalizując czas oczekiwania.
+* **Rozwiązywanie problemów współbieżności:** Zapobieganie zjawiskom takim jak *race condition*, *deadlock* czy *ticket stealing*.
+* **Wizualizacja czasu rzeczywistego:** Wykorzystanie potokó do przesyłania ustrukturyzowanego stanu systemu z warstwy logiki do warstwy prezentacji.
 
-## Wymagania systemowe
+## 🏗️ Struktura Projektu
 
-* System operacyjny z rodziny Linux / macOS
-* Kompilator `gcc` oraz program `make`
-* Python 3.x
-* Biblioteka Pygame (do instalacji: `pip install pygame` lub `sudo apt install python3-pygame`)
+Projekt został podzielony na dwie niezależne warstwy: obliczeniową oraz prezentacyjną.
 
-## Struktura plików
+### Pliki źródłowe:
+* `winda_zmienne.c` - Główny silnik symulacji wykorzystujący **zmienne warunkowe** (`pthread_cond_t`).
+* `winda_semafory.c` - Alternatywny silnik symulacji wykorzystujący **semafory POSIX** (`sem_t`).
+* `winda_utils.h` / `winda_utils.c` - Definicja struktur danych (stan budynku, parametry wind) oraz funkcja formatująca logi systemowe i strumień JSON.
+* `wizualizacja.py` - Graficzny interfejs czasu rzeczywistego (Smooth Scrolling, Dark Mode).
+* `Makefile` - Skrypt automatyzujący proces budowania i uruchamiania systemu.
 
-* `winda_utils.h` – Plik nagłówkowy zawierający definicje struktur (winda, system, kierunek) oraz deklaracje globalne.
-* `winda_utils.c` – Moduł generujący i wysyłający logi stanu systemu w formacie JSON.
-* `winda_cond.c` – Kod źródłowy wariantu 1 (zmienne warunkowe i muteksy).
-* `winda_sem.c` – Kod źródłowy wariantu 2 (semafory nienazwane i muteksy).
-* `wizualizacja.py` – Aplikacja graficzna GUI oparta na bibliotece Pygame.
-* `Makefile` – Skrypt automatyzujący proces budowania projektu.
+## 🚀 Wymagania systemowe
+* Kompilator GCC (ze wsparciem dla biblioteki `pthread`)
+* Środowisko Linux / WSL / macOS
+* Narzędzie `make`
+* Python 3.x z zainstalowaną biblioteką Pygame (`pip install pygame`)
 
-## Kompilacja
+## 🛠️ Kompilacja i Uruchamianie
 
-Aby skompilować oba warianty programu, otwórz terminal w folderze z projektem i wpisz:
+W projekcie wykorzystano plik `Makefile`, który maksymalnie upraszcza proces testowania. 
+W terminalu, w głównym folderze projektu, dostępne są następujące komendy:
 
-    make
+### 1. Budowanie projektu
+```bash
+make
+```
+Kompiluje jednocześnie obie wersje systemu (`winda_zmienne` oraz `winda_semafory`).
 
-Polecenie to wygeneruje dwa pliki wykonywalne: `winda_cond` oraz `winda_sem`.
-Aby wyczyścić pliki binarne, użyj polecenia `make clean`.
+### 2. Szybkie uruchomienie z wizualizacją
+Aby automatycznie skompilować system i od razu podpiąć go pod graficzną nakładkę w Pythonie (uruchomienie domyślne: 3 windy, 8 pięter, 4 osoby pojemności):
 
-## Uruchamianie i Parametry
+Wersja oparta na zmiennych warunkowych:
+```bash
+make run-zmienne
+```
 
-Program przyjmuje dokładnie 4 parametry wejściowe:
-1. **Liczba wind** w budynku
-2. **Liczba pięter** (wliczając parter jako piętro 0)
-3. **Liczba studentów** (wątków) biorących udział w symulacji
-4. **Pojemność windy** (maksymalna liczba pasażerów w jednej kabinie)
+Wersja oparta na semaforach:
+```bash
+make run-semafory
+```
 
-### Uruchomienie samej symulacji (tryb tekstowy surowy)
+### 3. Uruchamianie manualne (Tryb tekstowy / Terminal)
+Jeżeli chcesz uruchomić program bez interfejsu graficznego, obserwując jedynie klasyczne logi tekstowe i surowy JSON, użyj polecenia:
+```bash
+./winda_zmienne <liczba_wind> <liczba_pieter> <pojemnosc_windy>
+# Przykład: ./winda_zmienne 4 10 5
+```
 
-    ./winda_cond 2 5 15 3
+### 4. Sprzątanie projektu
+Aby usunąć pliki binarne oraz pliki obiektowe `.o`:
+```bash
+make clean
+```
 
-### Uruchomienie z wizualizacją graficzną i logami (Zalecane)
-Wykorzystujemy mechanizm potoku (pipe), aby przekazać dane z C do Pythona:
+## ⚙️ Działanie Algorytmu
+Winda w stanie bezczynności (`DIR_STOP`) cyklicznie skanuje tablicę oczekujących studentów. Gdy wykryje zapotrzebowanie, oblicza odległość do każdego ze zgłoszeń, wybiera najbliższe piętro i rusza w jego stronę. Pasażer wsiadając nadaje windzie nowy wektor ruchu zależny od swojego celu. 
 
-    ./winda_cond 2 5 15 3 | python3 wizualizacja.py
-
-*(Zamiast `winda_cond` możesz w ten sam sposób uruchomić program `winda_sem`)*.
-
-W oknie terminala pojawią się czytelne, klasyczne logi systemowe, natomiast w oddzielnym oknie uruchomi się animacja graficzna z opóźnieniem "Slow Mo" (domyślnie 1 sekunda na zdarzenie). Szybkość symulacji można modyfikować, zmieniając stałą `SLOW_MO_DELAY` w pliku `wizualizacja.py`.
+Dzięki zastosowaniu wywołań blokujących (`pthread_cond_wait` oraz `sem_wait`), system nie zużywa zasobów procesora (eliminacja zjawiska *busy-waiting*) podczas oczekiwania na zdarzenia.
