@@ -7,6 +7,7 @@ import pygame
 
 SLOW_MO_DELAY = 0
 
+# Paleta kolorów
 BG_COLOR = (30, 30, 46)
 SHAFT_COLOR = (49, 50, 68)
 FLOOR_COLOR = (88, 91, 112)
@@ -17,7 +18,7 @@ COLOR_STOP = (137, 180, 250)
 
 data_queue = queue.Queue()
 
-
+# Wyświetlanie zwyczajnych logów
 def print_classic_log(state):
     af = state["active_floor"]
     elevators_str = []
@@ -28,7 +29,7 @@ def print_classic_log(state):
         )
     print(f"P{af} | {' | '.join(elevators_str)}  <-- {state['msg']}")
 
-
+# Odbiór danych z programu w C przez potok
 def read_stdin():
     for line in sys.stdin:
         try:
@@ -42,17 +43,18 @@ def read_stdin():
 
 threading.Thread(target=read_stdin, daemon=True).start()
 
+# Inicjalizacja okna
 pygame.init()
 WIDTH, HEIGHT = 1000, 700
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
-pygame.display.set_caption("Akademik Pico Bello - Live View")
+pygame.display.set_caption("Symulator wind")
 clock = pygame.time.Clock()
 
 font_title = pygame.font.SysFont("Segoe UI", 32, bold=True)
 font_bold = pygame.font.SysFont("Segoe UI", 16, bold=True)
 font_small = pygame.font.SysFont("Segoe UI", 14, bold=True)
 
-
+# Klasa pomocnicza przechowująca fizyczny stan windy
 class VisualElevator:
     def __init__(self, e_id):
         self.id = e_id
@@ -67,20 +69,23 @@ current_state = None
 vis_elevators = {}
 last_msg = "Oczekiwanie na start systemu..."
 
+# Główna pętla renderująca
 running = True
 while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
 
+    # Wyciąganie najnowszych danych z kolejki
     while not data_queue.empty():
         current_state = data_queue.get()
         last_msg = current_state.get("msg", last_msg)
 
     screen.fill(BG_COLOR)
-
+    
+    # Rysowanie nagłówka i ostatniej akcji
     screen.blit(
-        font_title.render("Akademik Pico Bello", True, TEXT_COLOR), (30, 20)
+        font_title.render("Symulator wind w akademiku", True, TEXT_COLOR), (30, 20)
     )
     status_color = (
         COLOR_UP
@@ -95,10 +100,12 @@ while running:
     if current_state:
         num_floors = len(current_state["waiting"])
         num_elevators = len(current_state["elevators"])
-
+	
+	# Dynamiczne obliczanie wysokości pięter
         floor_height = (HEIGHT - 150) // max(1, num_floors)
         start_y = HEIGHT - 50
 
+	# Aktualizacja punktów docelowych dla każdej windy
         for e_data in current_state["elevators"]:
             eid = e_data["id"]
             if eid not in vis_elevators:
@@ -109,7 +116,8 @@ while running:
             ve.passengers = e_data["passengers"]
             ve.capacity = e_data["capacity"]
             ve.dir = e_data["dir"]
-
+            
+	# Rysowanie struktury pięter i oczekujących studentów
         for i in range(num_floors):
             y = start_y - (i * floor_height)
             pygame.draw.line(screen, FLOOR_COLOR, (40, y), (WIDTH - 40, y), 3)
@@ -126,7 +134,8 @@ while running:
                 screen.blit(
                     q_text, (120 + 15 - q_text.get_width() // 2, y - 34)
                 )
-
+                
+	# Rysowanie szybów i kabin wind
         for idx, (eid, ve) in enumerate(sorted(vis_elevators.items())):
             el_x = 250 + (idx * 140)
 
@@ -164,7 +173,7 @@ while running:
             )
 
     pygame.display.flip()
-    clock.tick(60)
+    clock.tick(60) # Utrzymanie płynności na poziomie 60 klatek na sekundę
 
 pygame.quit()
 

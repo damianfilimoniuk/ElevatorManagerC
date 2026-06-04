@@ -52,6 +52,7 @@ void* elevator_thread(void* arg) {
             print_system_state(me->current_floor, msg);
         }
 
+	// Ręczne powiadomienie każdego pasującego studentów
         while (sem_trywait(&hall.elevator_sems[id]) == 0);
         for (int i = 0; i < me->passengers; i++) {
             sem_post(&hall.elevator_sems[id]);
@@ -115,6 +116,7 @@ void* student_thread(void* arg) {
             start_floor);
     print_system_state(start_floor, msg);
 
+    // Zabezpiecenie przed kradzieżą biletów
     int last_seen_floor = start_floor;
     while (my_elevator->current_floor != dest_floor) {
         pthread_mutex_unlock(&hall.hall_mutex);
@@ -170,6 +172,7 @@ int main(int argc, char* argv[]) {
 
     pthread_mutex_init(&hall.hall_mutex, NULL);
 
+    // Inicjalizacja tablic semaforów
     hall.floor_sems = malloc(hall.num_floors * sizeof(sem_t));
     for (int i = 0; i < hall.num_floors; i++) {
         sem_init(&hall.floor_sems[i], 0, 0);
